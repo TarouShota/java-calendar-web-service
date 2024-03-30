@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 
-//Create an Event entity to save events to the database. The table should contain the following columns:
+//Create an webCalendarSpring.Event entity to save events to the database. The table should contain the following columns:
 //
 //id of the INTEGER type. It should be our PRIMARY KEY. Its value will be incremented and generated automatically. Starting from 1.
 //event of the VARCHAR type. It should be NOT NULL.
-//date of the DATE type. It should be NOT NULL.
+//date of the DATE type. It should be NOT NULL.`
 
 @Entity
 public class Event {
@@ -23,11 +23,12 @@ public class Event {
 
     public Event(String event, LocalDate date) {
         this.event = event;
-        this.date= date;
+        this.date = date;
     }
+
     public Event(String event, String date) {
         this.event = event;
-        this.date= LocalDate.parse(date);
+        this.date = LocalDate.parse(date);
     }
 
     public Event() {
@@ -36,17 +37,21 @@ public class Event {
     public String getEvent() {
         return event;
     }
-    public LocalDate getDate(){
+
+    public LocalDate getDate() {
         return date;
     }
-    public long getId(){
+
+    public long getId() {
         return id;
     }
-    public void setEvent(String event){
-        this.event=event;
+
+    public void setEvent(String event) {
+        this.event = event;
     }
-    public void setDate(LocalDate date){
-        this.date=date;
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
 }
