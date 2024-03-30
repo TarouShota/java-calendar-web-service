@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import webCalendarSpring.demo.Event;
 
 //@RepositoryRestResource(collectionResourceRel = "event", path = "event")
-public interface EventRepository extends CrudRepository<Event, Long> {
+public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByDate(LocalDate date);
 

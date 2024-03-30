@@ -1,9 +1,6 @@
 package webCalendarSpring.demo;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
@@ -19,8 +16,9 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
+    @Column(nullable = false)
     private String event;
+    @Column(nullable = false)
     private LocalDate date;
 
     public Event(String event, LocalDate date) {

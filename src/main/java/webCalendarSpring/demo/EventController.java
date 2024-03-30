@@ -11,43 +11,51 @@ import java.time.LocalDate;
 import java.util.*;
 
 
-@RestController("/")
+@RestController
 public class EventController {
-    private final List<String> todayEvent = Collections.emptyList();
-    public static class EventClass {
-        public String event;
-        public LocalDate date;
-    }
-    public static class EventClassResponse extends EventClass{
-        public String message;
-
-    }
-
-//    @GetMapping(
-//            value = "event/today",
-//            produces="application/json")
+//    public class EventWithMessage extends Event{
+//        public EventWithMessage(Event event){
 //
-//    public ResponseEntity<List<String>> getTodayEventList(){
-//
-//        return ResponseEntity.ok().body(todayEvent);
-//
-//    }
-//    @PostMapping(value = "event")
-//    public  ResponseEntity<EventClassResponse> putEventList(@RequestBody EventClass requestEvent){
-//        if(requestEvent.date==null) {
-//            return ResponseEntity.badRequest().body(null);
 //        }
-//        if(requestEvent.event==null || requestEvent.event.isBlank()){
-//            return ResponseEntity.badRequest().body(null);
-//        }
-//
-//        EventClassResponse response = new EventClassResponse();
-//        response.message = "The event has been added!";
-//        response.event = requestEvent.event;
-//        response.date=requestEvent.date;
-//
-//
-//        return ResponseEntity.ok().body(response);
 //    }
+    private final EventRepository repository;
+    public EventController(EventRepository repository) {
+        this.repository = repository;
+    }
+    // Aggregate root
+    // tag::get-aggregate-root[]
+    @GetMapping(
+            value = "/event",
+            produces="application/json")
+    public ResponseEntity<List<Event>> getAllEvents(){
+        List<Event> queryResult = repository.findAll();
+        if(queryResult.isEmpty()){
+            return ResponseEntity.notFound().build();
+        };
+
+        return ResponseEntity.ok().body(queryResult);
+    }
+    @GetMapping(
+            value = "/event/today",
+            produces="application/json")
+    public ResponseEntity<List<Event>> getTodayEvent(){
+        LocalDate today = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(),LocalDate.now().getDayOfMonth());
+        List<Event> queryResult = repository.findByDate(today);
+
+        return ResponseEntity.ok().body(queryResult);
+    }
+
+
+    @PostMapping(value = "/event")
+    public  ResponseEntity<Event> putEventList(@RequestBody Event eventToAdd ){
+        if(eventToAdd.getDate()==null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        if(eventToAdd.getEvent()==null || eventToAdd.getEvent().isBlank()){
+            return ResponseEntity.badRequest().body(null);
+        }
+        repository.save(eventToAdd);
+        return ResponseEntity.ok().body(null);
+    }
 
 }
