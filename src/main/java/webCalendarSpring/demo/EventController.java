@@ -29,7 +29,7 @@ public class EventController {
         this.assembler = assembler;
     }
 
-    @GetMapping(value = "/event", produces = "application/json")
+    @GetMapping(value = "/events", produces = "application/json")
     public CollectionModel<EntityModel<Event>> getAllEvents(@RequestParam(value = "start_time", required = false, defaultValue = minDate) String startTime,
                                                             @RequestParam(value = "end_time", required = false, defaultValue = maxDate) String endTime) {
 
@@ -44,7 +44,7 @@ public class EventController {
         return CollectionModel.of(queryResult, linkTo(methodOn(EventController.class).getAllEvents(startTime, endTime)).withSelfRel());
     }
 
-    @GetMapping(value = "/event/today", produces = "application/json")
+    @GetMapping(value = "/events/today", produces = "application/json")
     public CollectionModel<EntityModel<Event>> getTodayEvent() {
         LocalDate today = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
         List<EntityModel<Event>> queryResult = repository.findByDate(today).stream().map(assembler::toModel).collect(Collectors.toList());
@@ -55,7 +55,7 @@ public class EventController {
         return CollectionModel.of(queryResult, linkTo(methodOn(EventController.class).getTodayEvent()).withSelfRel());
     }
 
-    @GetMapping(value = "/event/{id}", produces = "application/json")
+    @GetMapping(value = "/events/{id}", produces = "application/json")
     public EntityModel<Event> getEventById(@PathVariable("id") Long id) {
         Event event = repository.findById(id).orElseThrow(EventNotFoundException::new);
 
@@ -63,7 +63,7 @@ public class EventController {
     }
 
 
-    @PostMapping(value = "/event")
+    @PostMapping(value = "/events")
     public ResponseEntity<?> newEvent(@RequestBody Event eventToAdd) {
         if (eventToAdd.getDate() == null || eventToAdd.getEvent() == null || eventToAdd.getEvent().isBlank()) {
             throw new InvalidEventException();
@@ -74,7 +74,7 @@ public class EventController {
 
     }
 
-    @DeleteMapping(value = "/event/{id}")
+    @DeleteMapping(value = "/events/{id}")
     public EntityModel<Event> deleteEventById(@PathVariable("id") Long id) {
         Event event = repository.findById(id).orElseThrow(EventNotFoundException::new);
         repository.deleteById(id);
