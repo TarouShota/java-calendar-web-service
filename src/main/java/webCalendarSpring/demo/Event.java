@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 
 @Entity
@@ -38,6 +39,9 @@ public class Event {
 
     public LocalDate getDate() {
         return date;
+    }
+    public String getDateString(){
+        return getDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     public long getId() {

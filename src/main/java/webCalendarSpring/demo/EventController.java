@@ -2,100 +2,82 @@ package webCalendarSpring.demo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RestController
 public class EventController {
-    public EventController(EventRepository repository) {
-        this.repository = repository;
-    }
 
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
-
-    public static class EventWithMessage {
-        public String message;
-        public String event;
-        public LocalDate date;
-
-    }
-
+    static final String minDate = "0000-01-01", maxDate = "9999-12-31";
     private final EventRepository repository;
+    private final EventModelAssembler assembler;
 
-    @GetMapping(
-            value = "/event",
-            produces = "application/json"
-    )
-    public ResponseEntity<List<Event>> getAllEventsByDate(@RequestParam(value = "start_time", required = false, defaultValue = "0000-01-01") String startTime,
-                                                          @RequestParam(value = "end_time", required = false, defaultValue = "9999-12-31") String endTime) {
-        List<Event> queryResult = repository.findAllByDateBetween(LocalDate.parse(startTime), LocalDate.parse(endTime));
+    public EventController(EventRepository repository, EventModelAssembler assembler) {
+        this.repository = repository;
+        this.assembler = assembler;
+    }
+
+    @GetMapping(value = "/event", produces = "application/json")
+    public CollectionModel<EntityModel<Event>> getAllEvents(@RequestParam(value = "start_time", required = false, defaultValue = minDate) String startTime,
+                                                            @RequestParam(value = "end_time", required = false, defaultValue = maxDate) String endTime) {
+
+
+        List<EntityModel<Event>> queryResult = repository.findAllByDateBetween(LocalDate.parse(startTime), LocalDate.parse(endTime))
+                .stream()
+                .map(assembler::toModel).collect(Collectors.toList());
+
         if (queryResult.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            throw new EventNotFoundException();
         }
-        return ResponseEntity.ok().body(queryResult);
+        return CollectionModel.of(queryResult, linkTo(methodOn(EventController.class).getAllEvents(startTime, endTime)).withSelfRel());
     }
 
-    @GetMapping(
-            value = "/event/today",
-            produces = "application/json")
-    public ResponseEntity<List<Event>> getTodayEvent() {
+    @GetMapping(value = "/event/today", produces = "application/json")
+    public CollectionModel<EntityModel<Event>> getTodayEvent() {
         LocalDate today = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
-        List<Event> queryResult = repository.findByDate(today);
+        List<EntityModel<Event>> queryResult = repository.findByDate(today).stream().map(assembler::toModel).collect(Collectors.toList());
 
-        return ResponseEntity.ok().body(queryResult);
+        if (queryResult.isEmpty()) {
+            throw new EventNotFoundException();
+        }
+        return CollectionModel.of(queryResult, linkTo(methodOn(EventController.class).getTodayEvent()).withSelfRel());
     }
 
-    @GetMapping(
-            value = "/event/{id}",
-            produces = "application/json"
-    )
-    public ResponseEntity<Object> getEventById(@PathVariable("id") Long id) {
-        Optional<Event> event = repository.findById(id);
-        if (event.isEmpty()) {
-            return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok().body(event);
+    @GetMapping(value = "/event/{id}", produces = "application/json")
+    public EntityModel<Event> getEventById(@PathVariable("id") Long id) {
+        Event event = repository.findById(id).orElseThrow(EventNotFoundException::new);
+
+        return assembler.toModel(event);
     }
 
 
     @PostMapping(value = "/event")
-    public ResponseEntity<EventWithMessage> putEventList(@RequestBody Event eventToAdd) {
-        System.getenv("hello");
-        if (eventToAdd.getDate() == null) {
-            return ResponseEntity.badRequest().body(null);
+    public ResponseEntity<?> newEvent(@RequestBody Event eventToAdd) {
+        if (eventToAdd.getDate() == null || eventToAdd.getEvent() == null || eventToAdd.getEvent().isBlank()) {
+            throw new InvalidEventException();
         }
-        if (eventToAdd.getEvent() == null || eventToAdd.getEvent().isBlank()) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        repository.save(eventToAdd);
 
-        EventWithMessage eventWithMessage = new EventWithMessage();
-        eventWithMessage.message = "The event has been added!";
-        eventWithMessage.event = eventToAdd.getEvent();
-        eventWithMessage.date = eventToAdd.getDate();
+        EntityModel<Event> entityModel = assembler.toModel(repository.save(eventToAdd));
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
 
-        return ResponseEntity.ok().body(eventWithMessage);
     }
 
     @DeleteMapping(value = "/event/{id}")
-    public ResponseEntity<Object> deleteEventById(@PathVariable("id") Long id) {
-        log.info(repository.findAll().toString());
-
-        Optional<Event> event = repository.findById(id);
-
-        if (event.isEmpty()) {
-            return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
-
-        }
+    public EntityModel<Event> deleteEventById(@PathVariable("id") Long id) {
+        Event event = repository.findById(id).orElseThrow(EventNotFoundException::new);
         repository.deleteById(id);
-        return ResponseEntity.ok().body(event);
+        return assembler.toModel(event);
     }
-
-
 }
