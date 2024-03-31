@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-//@RepositoryRestResource(collectionResourceRel = "event", path = "event")
-interface EventRepository extends JpaRepository<Event, Long> {
+public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByDate(LocalDate date);
 

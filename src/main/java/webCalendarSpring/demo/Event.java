@@ -1,15 +1,13 @@
 package webCalendarSpring.demo;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 import java.time.LocalDate;
 
-
-//Create an webCalendarSpring.Event entity to save events to the database. The table should contain the following columns:
-//
-//id of the INTEGER type. It should be our PRIMARY KEY. Its value will be incremented and generated automatically. Starting from 1.
-//event of the VARCHAR type. It should be NOT NULL.
-//date of the DATE type. It should be NOT NULL.`
 
 @Entity
 public class Event {

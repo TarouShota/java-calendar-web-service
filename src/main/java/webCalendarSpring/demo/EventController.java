@@ -19,7 +19,7 @@ public class EventController {
 
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
 
-    public class EventWithMessage {
+    public static class EventWithMessage {
         public String message;
         public String event;
         public LocalDate date;
@@ -38,8 +38,6 @@ public class EventController {
         if (queryResult.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        ;
-
         return ResponseEntity.ok().body(queryResult);
     }
 
@@ -61,7 +59,6 @@ public class EventController {
         Optional<Event> event = repository.findById(id);
         if (event.isEmpty()) {
             return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
-            //return new ResponseEntity<>(ResponseEntity.notFound().build().getStatusCode());
         }
         return ResponseEntity.ok().body(event);
     }
@@ -69,6 +66,7 @@ public class EventController {
 
     @PostMapping(value = "/event")
     public ResponseEntity<EventWithMessage> putEventList(@RequestBody Event eventToAdd) {
+        System.getenv("hello");
         if (eventToAdd.getDate() == null) {
             return ResponseEntity.badRequest().body(null);
         }
@@ -91,9 +89,6 @@ public class EventController {
 
         Optional<Event> event = repository.findById(id);
 
-        if (id > 3 && event.isEmpty()) {
-            return ResponseEntity.ok().body(new HashMap<>());
-        }
         if (event.isEmpty()) {
             return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
 

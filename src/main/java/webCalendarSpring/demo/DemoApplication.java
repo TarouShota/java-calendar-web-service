@@ -6,13 +6,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
+import org.springframework.context.annotation.ComponentScan;
+//import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.time.LocalDate;
 
 @SpringBootApplication
+//@EnableSwagger2
 public class DemoApplication {
-
-	private static final Logger log = LoggerFactory.getLogger(DemoApplication.class);
 
 	public static void main(String[] args) {
 
