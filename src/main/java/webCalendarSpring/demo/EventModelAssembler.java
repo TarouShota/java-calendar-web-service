@@ -1,8 +1,7 @@
 package webCalendarSpring.demo;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-import static webCalendarSpring.demo.EventController.maxDate;
-import static webCalendarSpring.demo.EventController.minDate;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
